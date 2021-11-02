@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 15:27:16 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/10/31 17:20:52 by rsanchez         ###   ########.fr       */
+/*   Updated: 2021/11/02 16:58:31 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ void	set_window(t_game *game, t_img *img)
 
 static void	init_window(t_game *game, t_win *win)
 {
-	win->mlx = mlx_init();
+	game->mlx = mlx_init();
 	if (!(scene.mlx))
 		exit_program(&scene, TRUE, "Unable to init mlx\n", 17);
 	game->b_size = BLOCK_SIZE;
@@ -78,18 +78,18 @@ static void	init_window(t_game *game, t_win *win)
 	game->back_dist = BACK_DISTANCE;
 	win->x = WINDOW_X;
 	win->y = WINDOW_Y;
-	win->addr = mlx_new_window(win->mlx, win->x, win->y, "so_long");
+	win->addr = mlx_new_window(game->mlx, win->x, win->y, "so_long");
 	if (!(win->addr))
-		exit_program(scene, TRUE, "Unable to create window\n", 24);
+		exit_program(game, TRUE, "Unable to create window\n", 24);
 }
 
 int	main(int ac, char **av)
 {
 	t_game	game;
 
-	init_zero(&scene, sizeof(scene));
+	init_zero(&scene, sizeof(game));
 	if (ac != 2)
-		exit_program(&scene, TRUE, "Wrong number of arguments\n", 26);
+		exit_program(&game, TRUE, "Wrong number of arguments\n", 26);
 	init_window(&game, &(game.win));
 	import_map(&game, &(game.map), av[1]);
 	draw_map(&game, &(game.map));

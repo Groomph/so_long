@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 16:19:25 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/10/31 17:20:45 by rsanchez         ###   ########.fr       */
+/*   Updated: 2021/11/02 13:52:27 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@
 # define BACK_DISTANCE 5
 # define WINDOW_X 720
 # define WINDOW_Y 576
+# define BACK_GROUND "backscreen.xmp"
 
 typedef struct	s_window
 {
-	void	*mlx;
 	void	*addr;
 	int	x;
 	int	y;
@@ -50,6 +50,9 @@ typedef struct	s_image
 	int	size_x;
 	int	size_y;
 	int	size_p;
+	int	cursor_x;
+	int	cursor_y;
+	int	cursor_p;
 	int	center_x;
 	int	center_y;
 	int	center_p;
@@ -60,6 +63,7 @@ typedef struct	s_image
 
 typedef struct s_game
 {
+	void	*mlx;
 	int	b_size;
 	int	b_pixel;
 	int	back_dist;

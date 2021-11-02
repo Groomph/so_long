@@ -1,4 +1,4 @@
-/* ************************************************************************** */
+G
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   draw_map.c                                         :+:      :+:    :+:   */
@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/25 10:48:34 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/10/28 10:40:26 by rsanchez         ###   ########.fr       */
+/*   Updated: 2021/11/02 16:58:29 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	draw_color(t_img *img, int *xy, int size, int color)
 		i2 = 0;
 		while(i2 < size)
 		{
-//			printf("%i\n", pixel);
+			//			printf("%i\n", pixel);
 			img->addr[pixel] = color;
 			pixel++;
 			i2++;
@@ -98,66 +98,95 @@ void	draw_back(t_img *img, t_img *back, int *xy, int size)
 	}
 }
 
-void	draw_map(t_scene *scene, t_map *map)
+static void	init_back(t_game *game, t_img *back)
 {
-	int	size_element;
-	t_img	back;
+	back->img = mlx_xpm_file_to_image(scene->mlx, BACK_GROUND,
+			&(back->size_x), &(back->size_y));
+	if (!(back->img))
+		exit_program(scene, TRUE, "Unable to open back file\n", 25);
+	back->addr = (int*)mlx_get_data_addr(back->img, &(back->bits_pixel),
+			&(back->size_x), &(back->endian));
+	if (!(back->addr))
+		exit_program(scene, TRUE, "Unable to get back adress\n", 26);
+	back->size_x /= 4;
+	back->size_p = back->size_x * back->size_y;
+	back->center_x = back->x / 2;
+	back->center_y = back->y / 2;
+	back->center_p = back->center_y * back->size_x;
+	back->center_p += back->center_x;
+	back->top_left_x = back->center_x - scene->x / 2;
+	back->top_left_y = back->center_y - scene->y / 2;
+	back->top_left_p = back->top_left_y * back->size_x;
+	back->top_left_p += back->top_left_x;
 
-	size_element = 48;
-	init_image(scene, &back, NULL, size_element);
-	init_image(scene, &(scene->img), &(scene->map), size_element);
-	
-	int	x2;
-	int	y2;
+}
+
+static void	fill_decor(t_img *decor)
+{
+	int	i;
+
+	i = 0;
+	while (i < decor->size_p)
+	{
+		decor->addr[i] = 4152;
+		i++;
+	}
+}
+
+static void	init_decor(t_game *game, t_img *decor, t_map *map)
+{
 	int	x;
 	int	y;
-	int	pixel;
-	int	pixel_b;
 
-	pixel = 0;
-	pixel_b = back.p_c;
-	pixel_b -= (scene->img.c.y * back.x);
-	pixel_b -= scene->img.c.x;
-	y2 = 0;
-	while (y2 < scene->img.y)
+	decor->size_x = game->win.x * 2 + map->max_x * game->b_size;
+	decor->size_y = game->win.y * 2 + map->max_y * game->b_size;
+	decor->img = mlx_new_image(game->mlx, decor->size_x, decor->size_y);
+	if (!(decor->img))
+		exit_program(scene, TRUE, "Unable to create img\n", 21);
+	decor->addr = (int*)mlx_get_data_addr(decor->img, &(decor->bits_pixel),
+			&(decor->size_x), &(decor->endian));
+	if (!(decor->addr))
+		exit_program(scene, TRUE, "Unable to get final adress\n", 27);
+	decor->size_x /= 4;
+	decor->size_p = decor->size_x * decor->size_y;
+	decor->center_x = decor->x / 2;
+	decor->center_y = decor->y / 2;
+	decor->center_p = decor->center_y * decor->size_x;
+	decor->center_p += decor->center_x;
+	decor->top_left_x = decor->center_x - scene->x / 2;
+	decor->top_left_y = decor->center_y - scene->y / 2;
+	decor->top_left_p = decor->top_left_y * decor->size_x;
+	decor->top_left_p += decor->top_left_x;
+	fill_decor(decor);
+}
+
+
+
+void	draw_map(t_game *game, t_map *map)
+{
+	int	x;
+	int	y;
+
+	init_back(game, &(game->back));
+	init_decor(game, &(game->decor), map);
+	place_cursor(&(game->decor), map);
+
+	while (y < map->max_y)
 	{
-		x2 = 0;
-		y = y2 / size_element;
-		while (x2 < scene->img.x)
+		x = 0;
+		while (x < map->max_x)
 		{
-			x = x2 / size_element;
 			if (x >= map->x[y] || map->map[y][x] == ' ')
 				scene->img.addr[pixel] = 4152;
 			else if (is_a_wall(map, x, y))
 				scene->img.addr[pixel] = which_wall(map, x2, y2,size_element) ;
 			else
 				scene->img.addr[pixel] = back.addr[pixel_b];
-			pixel++;
-			pixel_b++;
-			x2++;
-		}
-		pixel_b -= x2;
-		pixel_b += back.x;
-		y2++;
-		/*
-		x = 0;
-		while (x < map->max_x)
-		{
-			xy[0] = x;
-			xy[1] = y;
-//			printf("x: %i\n", x);
-//			printf("y: %i\n", y);
-			if (x >= map->x[y] || map->map[y][x] == ' ')
-				draw_color(&(scene->img), xy, size_element, 0x00FF0000);
-			else if (map->map[y][x] == '1')
-				draw_color(&(scene->img), xy, size_element, 0x0000FF00);
-			else
-				draw_back(&(scene->img), &back, xy, size_element);
+			move_next_block();
 			x++;
-//			set_window(scene, &(scene->img));
 		}
+		move_next_line();
 		y++;
-*/	}
+	}
 	write(1," done\n", 5);
-
 }
