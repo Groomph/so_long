@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 16:52:50 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/10/31 17:20:55 by rsanchez         ###   ########.fr       */
+/*   Updated: 2021/12/08 15:02:20 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,104 +16,94 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-static void	map_malloc2(t_map *map, int size, char **array, int *arr_x)
-{
-	int	i;
-
-	i = 0;
-	while (i <= size)
-	{
-		if (i < size / 2 && map->map)
-		{
-			array[i] = map->map[i];
-			arr_x[i] = map->x[i];
-		}
-		else
-		{
-			array[i] = NULL;
-			arr_x[i] = -1;
-		}
-		i++;
-	}
-}
-
-static int	map_malloc(t_game *game, t_map *map, int size)
-{
-	char	**array;
-	int		*arr_x;
-
-	array = malloc(sizeof(char *) * (size + 1));
-	if (!array)
-		exit_program(game, TRUE, "malloc error\n", 13);
-	arr_x = malloc(sizeof(int) * (size + 1));
-	if (!arr_x)
-	{
-		free(array);
-		exit_program(game, TRUE, "malloc error\n", 13);
-	}
-	map_malloc2(map, size, array, arr_x);
-	if (map->map)
-		free(map->map);
-	map->map = array;
-	if (map->x)
-		free(map->x);
-	map->x = arr_x;
-	return (size);
-}
-
 static void	check_elements(t_game *game, t_map *map, int y, char *line)
 {
 	int		x;
-	t_list	*new;
 
-	x = -1;
-	while (line[++x])
+	x = 0;
+	while (line[x])
 	{
-		if (line[x] == 'P' || line[x] == 'C'
-			|| line[x] == 'E' || line[x] == 'M')
+		if (line[x] == 'P')
 		{
-			new = lst_new(x, y);
-			if (!new)
-				exit_program(game, TRUE, "malloc error\n", 13);
-			else if (line[x] == 'P')
-				lst_addfront(&(map->origin), new);
-			else if (line[x] == 'C')
-				lst_addfront(&(map->item), new);
-			else if (line[x] == 'E')
-				lst_addfront(&(map->exit), new);
-			else if (line[x] == 'M')
-				lst_addfront(&(map->monster), new);
+			if (map->origin_x == -1)
+			{
+				map->origin_x = x;
+				map->origin_y = y;
+			}
+			else
+				line[x] = '0';
 		}
-		else if (line[x] != '0' && line[x] != '1' && line[x] != ' ')
+		else if (line[x] == 'C')
+			map->item++;
+		else if (line[x] == 'E')
+			map->exit++;
+		else if (line[x] != '0' && line[x] != '1')
 			exit_program(game, TRUE, "unknown map char\n", 17);
+		x++;
 	}
 }
 
-static void	read_file(t_game *game, t_map *map, int fd, int arr_size)
+static void	leave_gnl(t_game *game, char *buffer, int error)
+{
+	free(buffer);
+	if (error == 1)
+		exit_program(game, TRUE, "gnl error\n", 10);
+	else
+		exit_program(game, TRUE, "not rectangular map\n", 20);
+}
+
+static void	fill_map(t_game *game, t_map *map, int fd)
 {
 	BOOL	eof;
 	char	*buffer;
-	int	y;
+	int		y;
+	int		size;
 
 	eof = FALSE;
 	buffer = NULL;
 	y = 0;
 	while (!eof)
 	{
-		if (y == arr_size)
-			arr_size = map_malloc(game, map, arr_size * 2);
-		map->x[y] = get_next_line(fd, &buffer, &(map->map[y]), &eof);
-		if (map->max_x < map->x[y])
-			map->max_x = map->x[y];
-		if (map->x[y] == -1)
+		size = get_next_line(fd, &buffer, &(map->map[y]), &eof);
+		if (size == 0 && eof)
 		{
-			free(buffer);
-			exit_program(game, TRUE, "gnl error\n", 10);
+			free(map->map[y]);
+			map->map[y] = NULL;
+			return ;
 		}
+		if (size == -1)
+			leave_gnl(game, buffer, 1);
 		check_elements(game, map, y, map->map[y]);
 		y++;
 	}
-	map->max_y = y - 1;
+}
+
+static void	get_max_y(t_game *game, t_map *map, int fd)
+{
+	BOOL	eof;
+	char	*buffer;
+	char	*line;
+	int		size;
+
+	eof = FALSE;
+	buffer = NULL;
+	line = NULL;
+	map->max_y = 0;
+	map->max_x = -1;
+	while (!eof)
+	{
+		size = get_next_line(fd, &buffer, &line, &eof);
+		free(line);
+		if (size == 0 && eof)
+			return ;
+		if (size == -1)
+			leave_gnl(game, buffer, 1);
+		if (map->max_x == -1)
+			map->max_x = size;
+		if (size != map->max_x)
+			leave_gnl(game, buffer, 2);
+		map->max_y++;
+	}
 }
 
 void	import_map(t_game *game, t_map *map, char *file)
@@ -122,13 +112,22 @@ void	import_map(t_game *game, t_map *map, char *file)
 
 	fd = open(file, O_RDONLY);
 	if (fd == -1)
-		exit_program(game, TRUE, __FUNCTION__, -1);
-	read_file(game, map, fd, map_malloc(game, map, 20));
+		exit_program(game, TRUE, file, -1);
+	get_max_y(game, map, fd);
 	close(fd);
-	if (map->max_x > 1000 || map->max_y > 1000)
+	map->map = array_malloc(map->max_y + 1);
+	if (!(map->map))
+		exit_program(game, TRUE, "malloc error\n", 13);
+	fd = open(file, O_RDONLY);
+	if (fd == -1)
+		exit_program(game, TRUE, file, -1);
+	map->origin_x = -1;
+	fill_map(game, map, fd);
+	close(fd);
+	if (map->max_x > 100 || map->max_y > 100)
 		exit_program(game, TRUE, "map too big\n", 12);
-	if (!(map->origin) || !(map->item) || !(map->exit))
+	if (map->origin_x == -1 || !(map->item) || !(map->exit))
 		exit_program(game, TRUE, "missing mandatory map elements\n", 31);
-	if (!is_endedmap(game, map))
+	if (!is_walled(map))
 		exit_program(game, TRUE, "not ended map\n", 14);
 }

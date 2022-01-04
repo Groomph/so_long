@@ -6,7 +6,7 @@
 #    By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/19 16:05:34 by rsanchez          #+#    #+#              #
-#    Updated: 2021/10/27 16:03:48 by rsanchez         ###   ########.fr        #
+#    Updated: 2022/01/04 22:07:24 by rsanchez         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,9 @@ NAME = so_long
 
 CC = clang
 
-CFLAGS = -Wall -Wextra -Werror #--analyze
+CFLAGS = -Wall -Wextra -Werror
+
+#CFLAGS = --analyze
 
 FLAGSHARD = -Weverything
 
@@ -32,8 +34,11 @@ DIR_SP = sprites
 
 DIR_O = temporary
 
-SOURCES = main.c import_map.c flood_fill.c display_shell.c draw_map.c \
-	  wall.c $(DIR_SP)/blocks1.c
+SOURCES = main.c import_map.c is_walled.c draw_map.c \
+	  display_shell.c image.c utils.c game.c hook.c \
+	  $(DIR_SP)/ground.c $(DIR_SP)/wall.c \
+	  $(DIR_SP)/egg.c $(DIR_SP)/player.c \
+	  $(DIR_SP)/nest.c $(DIR_SP)/full_nest.c
 
 SRCS = $(addprefix $(DIR_S)/,$(SOURCES))
 

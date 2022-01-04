@@ -6,7 +6,7 @@
 #    By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/12/15 14:25:42 by rsanchez          #+#    #+#              #
-#    Updated: 2021/10/23 14:01:30 by romain           ###   ########.fr        #
+#    Updated: 2021/12/01 20:56:38 by rsanchez         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,6 +49,7 @@ SOURCES	= init_zero.c valeur_absolue.c \
 	  ${STRING}/strjoin.c ${STRING}/substr.c \
 	  ${STRING}/string_duplicate.c \
 	  ${ARRAY}/array_clear.c ${ARRAY}/array_string_duplicate.c \
+	  ${ARRAY}/array_malloc.c \
 	  ${NB_STR}/utoa_len.c ${NB_STR}/utoa_base.c \
 	  $(NB_STR)/itoa_base.c $(NB_STR)/atoi.c \
 	  $(NB_STR)/atoli.c ${NB_STR}/atodoub_windex.c \

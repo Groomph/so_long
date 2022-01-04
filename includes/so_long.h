@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 16:19:25 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/11/02 13:52:27 by rsanchez         ###   ########.fr       */
+/*   Updated: 2021/12/08 17:30:13 by romain           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,76 +17,86 @@
 # include "mlx.h"
 
 # define BLOCK_SIZE 48
-# define BACK_DISTANCE 5
-# define WINDOW_X 720
-# define WINDOW_Y 576
-# define BACK_GROUND "backscreen.xmp"
 
-typedef struct	s_window
+enum	e_key
+{
+	ESCAPE = 65307,
+	UP = 65362,
+	DOWN = 65364,
+	RIGHT = 65363,
+	LEFT = 65361,
+	SPACE = 32,
+};
+
+typedef struct s_window
 {
 	void	*addr;
-	int	x;
-	int	y;
+	int		x;
+	int		y;
+	int		max_x;
+	int		max_y;
 }		t_win;
 
 typedef struct s_map
 {
 	char	**map;
-	int	*x;
-	int	max_x;
-	int	max_y;
-	t_list	*origin;
-	t_list	*item;
-	t_list	*exit;
-	t_list	*monster;
+	char	**copy;
+	int		max_x;
+	int		max_y;
+	int		item;
+	int		exit;
+	int		origin_x;
+	int		origin_y;
 }		t_map;
 
-typedef struct	s_image
+typedef struct s_image
 {
 	void	*img;
-	int	*addr;
-	int	bits_pixel;
+	int		*addr;
+	int		bits_pixel;
 	BOOL	endian;
-	int	size_x;
-	int	size_y;
-	int	size_p;
-	int	cursor_x;
-	int	cursor_y;
-	int	cursor_p;
-	int	center_x;
-	int	center_y;
-	int	center_p;
-	int	top_left_x;
-	int	top_left_y;
-	int	top_left_p;
+	int		size_x;
+	int		size_y;
+	int		size_b;
 }		t_img;
 
 typedef struct s_game
 {
 	void	*mlx;
-	int	b_size;
-	int	b_pixel;
-	int	back_dist;
+	int		b_pixel;
+	int		player_x;
+	int		player_y;
+	int		count_move;
+	int		loot;
+	BOOL	end;
 	t_win	win;
-	t_img	back;
+	t_img	img;
 	t_img	decor;
 	t_map	map;
 }		t_game;
 
+int		close_window(t_game *game);
 void	exit_program(t_game *game, BOOL error, const char *str, int size);
 void	import_map(t_game *game, t_map *map, char *file);
-void	draw_map(t_game *game, t_map *map);
-void	create_window(t_win *win)
-void	set_window(t_game *game, t_img *img);
-int	which_wall(t_map *map, int x, int y, int size);
-
-BOOL	is_endedmap(t_game *game, t_map *map);
-BOOL	go_to(t_map *map, int x, int y);
+BOOL	is_walled(t_map *map);
+void	start_game(t_game *game, t_map *map, t_img *img);
+void	draw_map(t_game *game, t_map *map, t_img *img);
+int		press_key(int key, t_game *game);
 
 BOOL	is_outofthemap(t_map *map, int x, int y);
-BOOL	is_a_wall(t_map *map, int x, int y);
+BOOL	is_a_wall(char **map, int x, int y);
 
-int	get_color_block1(int i, int i2);
+void	draw_ground(t_img *img, int cursor);
+void	draw_wall(t_img *img, int cursor, char c);
+void	draw_egg(t_img *img, int cursor);
+void	draw_player(t_img *img, int cursor);
+void	draw_nest(t_img *img, int cursor);
+void	draw_full_nest(t_img *img, int cursor);
+
+int		next_line(t_img *img, int cursor);
+int		block_line_feed(t_img *img, int cursor);
+int		next_block(int cursor);
 
 void	print_map(t_map *map);
+void	print_copy(t_map *map);
 #endif

@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 15:27:16 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/11/02 16:58:31 by rsanchez         ###   ########.fr       */
+/*   Updated: 2021/12/08 17:20:33 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,75 +25,69 @@ void	exit_program(t_game *game, BOOL error, const char *str, int size)
 		else
 			perror(str);
 	}
-	array_clear((void **)game->map.map);
-	free(game->map.x);
-	lst_clear(&(game->map.origin), &free);
-	lst_clear(&(game->map.item), &free);
-	lst_clear(&(game->map.exit), &free);
-	lst_clear(&(game->map.monster), &free);
+	if (game->map.map)
+		array_clear((void **)game->map.map);
+	if (game->map.copy)
+		array_clear((void **)game->map.copy);
 	if (game->win.addr)
-		mlx_destroy_window(game->win.mlx, game->win.addr);
-	if (game->back.img)
-		mlx_destroy_image(game->win.mlx, game->back.img);
-	if (game->decor.img)
-		mlx_destroy_image(game->win.mlx, game->decor.img);
-	if (game->win.mlx)
+		mlx_destroy_window(game->mlx, game->win.addr);
+	if (game->img.img)
+		mlx_destroy_image(game->mlx, game->img.img);
+	if (game->mlx)
 	{
-		mlx_destroy_display(game->win.mlx);
-		free(game->win.mlx);
+		mlx_destroy_display(game->mlx);
+		free(game->mlx);
 	}
 	exit(1);
 }
 
+int	close_window(t_game *game)
+{
+	exit_program(game, FALSE, NULL, -1);
+	return (1);
+}
+
+/*
 int	update(t_scene *scene)
 {
 	mlx_put_image_to_window(scene->mlx, scene->window, scene->img.img, 0, 0);
 	return (1);
 }
-
-void	set_window(t_game *game, t_img *img)
-{
-	mlx_put_image_to_window(game->win.mlx, game->win.addr, img->img,
-			(img->x - scene->x) / -2, (img->y - scene->y) / -2);
-//	mlx_put_image_to_window(scene->mlx, scene->window, img->img,
-//			img->x / -2 + 360, img->y / -2 + 288);
-/*	int	i;
-
-	i = 0;
-	while (img2.addr[i])
-	{
-		printf("%u\n", img2.addr[i]);
-		i++;
-	}
-*/	
-}
+*/
 
 static void	init_window(t_game *game, t_win *win)
 {
 	game->mlx = mlx_init();
-	if (!(scene.mlx))
-		exit_program(&scene, TRUE, "Unable to init mlx\n", 17);
-	game->b_size = BLOCK_SIZE;
-	game->b_pixel = game->b_size * game->b_size;
-	game->back_dist = BACK_DISTANCE;
-	win->x = WINDOW_X;
-	win->y = WINDOW_Y;
+	if (!(game->mlx))
+		exit_program(game, TRUE, "Unable to init mlx\n", 19);
+	mlx_get_screen_size(game->mlx, &(win->max_x), &(win->max_y));
+	if (game->map.max_x * BLOCK_SIZE > win->max_x
+		|| game->map.max_y * BLOCK_SIZE > win->max_y)
+		exit_program(game, TRUE, "map too big\n", 12);
+	win->x = game->map.max_x * BLOCK_SIZE;
+	win->y = game->map.max_y * BLOCK_SIZE;
 	win->addr = mlx_new_window(game->mlx, win->x, win->y, "so_long");
 	if (!(win->addr))
 		exit_program(game, TRUE, "Unable to create window\n", 24);
+	game->img.size_x = win->x;
+	game->img.size_y = win->y;
+	game->img.size_b = game->img.size_x * game->img.size_y;
 }
 
 int	main(int ac, char **av)
 {
 	t_game	game;
 
-	init_zero(&scene, sizeof(game));
+	init_zero(&game, sizeof(game));
 	if (ac != 2)
 		exit_program(&game, TRUE, "Wrong number of arguments\n", 26);
-	init_window(&game, &(game.win));
 	import_map(&game, &(game.map), av[1]);
-	draw_map(&game, &(game.map));
-	set_window(&game, &(game.img));
-	mlx_loop(game.win.mlx);
+	print_map(&(game.map));
+	init_window(&game, &(game.win));
+	start_game(&game, &(game.map), &(game.img));
+	mlx_hook(game.win.addr, 2, (1L << 0), press_key, &game);
+	mlx_hook(game.win.addr, 33, (1L << 17), close_window, &game);
+	mlx_loop(game.mlx);
+	exit_program(&game, FALSE, NULL, -1);
 	return (1);
 }

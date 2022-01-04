@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/15 14:25:29 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/10/23 14:00:45 by romain           ###   ########.fr       */
+/*   Updated: 2021/12/01 20:57:41 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ char				*string_duplicate(const char *original, int size);
 
 void				array_clear(void **array);
 char				**array_string_duplicate(char **tab, int size);
+char				**array_malloc(int size);
 
 /*
  *******************  NB & STRING CONVERSION  *******************
