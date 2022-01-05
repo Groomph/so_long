@@ -6,11 +6,13 @@
 #    By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/07/19 16:05:34 by rsanchez          #+#    #+#              #
-#    Updated: 2022/01/04 22:07:24 by rsanchez         ###   ########.fr        #
+#    Updated: 2022/01/05 22:43:53 by rsanchez         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = so_long
+
+NAMEB = so_long
 
 CC = clang
 
@@ -28,11 +30,17 @@ LIBLINUX = -L $(LIB)/minilibx-linux/ -lmlx -lXext -lX11 -lm
 
 HEADER = includes
 
+HEADERB = includes_bonus
+
 DIR_S = sources
 
-DIR_SP = sprites
-
 DIR_O = temporary
+
+DIR_SB = sources_bonus
+
+DIR_OB = temporary_bonus
+
+DIR_SP = sprites
 
 SOURCES = main.c import_map.c is_walled.c draw_map.c \
 	  display_shell.c image.c utils.c game.c hook.c \
@@ -40,13 +48,24 @@ SOURCES = main.c import_map.c is_walled.c draw_map.c \
 	  $(DIR_SP)/egg.c $(DIR_SP)/player.c \
 	  $(DIR_SP)/nest.c $(DIR_SP)/full_nest.c
 
+SOURCESB = main.c import_map.c is_walled.c draw_map.c \
+	  display_shell.c image.c utils.c game.c hook.c \
+	  $(DIR_SP)/ground.c $(DIR_SP)/wall.c \
+	  $(DIR_SP)/egg.c $(DIR_SP)/player.c \
+	  $(DIR_SP)/nest.c $(DIR_SP)/full_nest.c \
+	  $(DIR_SP)/numbers.c $(DIR_SP)/monster.c
+
 SRCS = $(addprefix $(DIR_S)/,$(SOURCES))
 
 OBJS = $(addprefix $(DIR_O)/,$(SOURCES:.c=.o))
 
+SRCSB = $(addprefix $(DIR_SB)/,$(SOURCESB))
+
+OBJSB = $(addprefix $(DIR_OB)/,$(SOURCESB:.c=.o))
+
 all: $(NAME)
 
-bonus: $(NAME)
+bonus: $(NAMEB)
 
 $(NAME): $(OBJS)
 	make -C $(LIB)/libft
@@ -55,12 +74,18 @@ $(NAME): $(OBJS)
 
 $(NAMEB): $(OBJSB)
 	make -C $(LIB)/libft
-	$(CC) $(CFLAGS) -o $(NAMEB) $(OBJSB) $(LIBFT)
+	make -C $(LIB)/minilibx-linux
+	$(CC) $(CFLAGS) -o $(NAMEB) $(OBJSB) $(LIBFT) $(LIBLINUX)
 
 $(DIR_O)/%.o: $(DIR_S)/%.c
 	@mkdir -p $(DIR_O)
 	@mkdir -p $(DIR_O)/$(DIR_SP)
 	$(CC) $(CFLAGS) -I $(HEADER) -o $@ -c $<
+
+$(DIR_OB)/%.o: $(DIR_SB)/%.c
+	@mkdir -p $(DIR_OB)
+	@mkdir -p $(DIR_OB)/$(DIR_SP)
+	$(CC) $(CFLAGS) -I $(HEADERB) -o $@ -c $<
 
 norme:
 	@echo
@@ -69,9 +94,14 @@ norme:
 	norminette $(HEADER)/
 	@echo
 	norminette $(DIR_S)/
+	@echo
+	norminette $(HEADERB)/
+	@echo
+	norminette $(DIR_SB)/
 
 clean:
 	rm -rf $(DIR_O)
+	rm -rf $(DIR_OB)
 	make fclean -C $(LIB)/libft
 	make clean -C $(LIB)/minilibx-linux
 
