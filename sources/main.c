@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 15:27:16 by rsanchez          #+#    #+#             */
-/*   Updated: 2021/12/08 17:20:33 by rsanchez         ###   ########.fr       */
+/*   Updated: 2022/01/05 23:25:13 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ int	main(int ac, char **av)
 	if (ac != 2)
 		exit_program(&game, TRUE, "Wrong number of arguments\n", 26);
 	import_map(&game, &(game.map), av[1]);
-	print_map(&(game.map));
 	init_window(&game, &(game.win));
 	start_game(&game, &(game.map), &(game.img));
 	mlx_hook(game.win.addr, 2, (1L << 0), press_key, &game);

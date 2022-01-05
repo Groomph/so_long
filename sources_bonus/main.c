@@ -6,7 +6,7 @@
 /*   By: rsanchez <rsanchez@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/22 15:27:16 by rsanchez          #+#    #+#             */
-/*   Updated: 2022/01/05 21:55:25 by rsanchez         ###   ########.fr       */
+/*   Updated: 2022/01/05 23:28:02 by rsanchez         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ int	main(int ac, char **av)
 	if (ac != 2)
 		exit_program(&game, TRUE, "Wrong number of arguments\n", 26);
 	import_map(&game, &(game.map), av[1]);
-	print_map(&(game.map));
 	game.last_refresh = 0;
 	game.fps_delay = 1000 / MAX_FPS;
 	init_window(&game, &(game.win));
